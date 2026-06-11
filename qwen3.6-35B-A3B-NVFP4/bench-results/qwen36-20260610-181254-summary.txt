@@ -1,0 +1,6 @@
+file: /home/mohammad/vllm/qwen3.6-35B-A3B-NVFP4/bench-results/qwen36-20260610-181254.json
+concurrency	generation_tps	peak_tps	e2e_ttft_s
+1	41.557	42.000	476.608
+2	85.136	88.000	705.587
+
+Best generation throughput: 85.13589408341915 tok/s at concurrency 2

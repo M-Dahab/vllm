@@ -1,0 +1,9 @@
+file: /home/mohammad/vllm/google_gemma-4-12B-it/bench-results/gemma4-12b-20260610-130411.json
+concurrency	generation_tps	peak_tps	e2e_ttft_s	req_per_s
+1.000	8.056	9.000	717.338	
+2.000	19.807	22.000	917.912	
+4.000	38.608	44.000	1053.558	
+8.000	75.357	88.000	1856.159	
+16.000	117.474	160.000	2830.038	
+
+Best generation throughput: 117.47394797321473 tok/s at concurrency 16
