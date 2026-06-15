@@ -19,6 +19,16 @@ cd google_gemma-4-12B-it
 MODE=throughput ./run-gemma4-12b-vllm.sh    # high parallel throughput
 ```
 
+### [Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF](./qwopus3.6-27B-Coder-MTP-GGUF)
+
+Coder-finetuned 27B dense model with Multi-Token Prediction (MTP) head. GGUF Q4_K_M quant (~15.6 GB). Loaded via vLLM's GGUF loader on `vllm/vllm-openai:latest`. Strong coding/agentic reasoning — 67.0% SWE-bench Verified.
+
+```bash
+cd qwopus3.6-27B-Coder-MTP-GGUF
+./run-qwopus36-vllm.sh
+ENABLE_MTP=true ./run-qwopus36-vllm.sh    # enable MTP speculation (experimental)
+```
+
 ### [RedHatAI/Qwen3.6-35B-A3B-NVFP4](./qwen3.6-35B-A3B-NVFP4)
 
 Multimodal MoE (35B total, ~3B active). NVFP4 quantized via compressed-tensors. Uses `vllm/vllm-openai:latest` image. **Highest aggregate throughput tested** on this hardware: **127 tok/s at concurrency 4** with full 262K context.
@@ -29,11 +39,20 @@ cd qwen3.6-35B-A3B-NVFP4
 # Benchmarked: 40 tok/s (c1), 80 tok/s (c2), 127 tok/s (c4) — PP=512, TG=128
 ```
 
+### [cyburn/Qwopus3.6-35B-A3B-NVFP4 (MoE + MTP)](./qwopus3.6-35B-A3B)
+
+Multimodal MoE (35B total, 3.5B active per token), 256 experts × 8 active, MTP 1 head, 40 layers with hybrid Mamba+Attention. NVFP4+BF16 mixed quant optimized for Blackwell (4.75 bits avg, ~23.5 GB). Native vLLM support via compressed-tensors — no patches needed. Same config as the original Jackrong model.
+
+```bash
+cd qwopus3.6-35B-A3B
+./run-qwopus36-35b-a3b.sh
+```
+
 ## Hardware Context
 
 - **GPU**: NVIDIA GB10 (Blackwell CC 12.1), 119.7 GiB unified memory
 - **Arch**: aarch64 (ARM Grace)
-- **Best practice**: 0.92–0.94 `--gpu-memory-utilization` for max-context profiles (0.95+ fails the startup free-memory check)
+- **GPU memory utilization**: all profiles now default to **0.70** for reliability across models; override via `GPU_MEMORY_UTILIZATION=0.85 ./run-*.sh`
 - **Restart safety**: default `--restart unless-stopped` for production; pass `RESTART_POLICY=no` for tuning
 
 ## Benchmarking

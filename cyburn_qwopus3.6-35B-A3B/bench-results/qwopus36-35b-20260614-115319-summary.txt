@@ -1,0 +1,10 @@
+file: /home/mohammad/vllm/cyburn_qwopus3.6-35B-A3B/bench-results/qwopus36-35b-20260614-115319.json
+concurrency	generation_tps	peak_tps	e2e_ttft_s	req_per_s
+1.000	61.743	69.000	206.090	
+2.000	99.562	119.000	856.901	
+4.000	124.823	166.000	612.329	
+8.000	132.335	172.500	2314.110	
+16.000	135.646	188.000	5749.850	
+32.000	131.127	179.000	13484.811	
+
+Best generation throughput: 135.6462949487123 tok/s at concurrency 16

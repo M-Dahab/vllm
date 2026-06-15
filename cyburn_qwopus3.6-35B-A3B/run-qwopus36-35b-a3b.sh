@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-MODEL_ID="${MODEL_ID:-RedHatAI/Qwen3.6-35B-A3B-NVFP4}"
-CONTAINER_NAME="${CONTAINER_NAME:-qwen36-vllm}"
+# vLLM runner for cyburn/Qwopus3.6-35B-A3B-v1-PrismaSCOUT-Blackwell-NVFP4-BF16-vllm-4.75bits
+# Architecture: Qwen3.5-MoE (256x8), NVFP4+BF16+MXFP8 compressed-tensors quant,
+#               Multimodal (image-text-to-text), MTP 1 head, Blackwell-optimized.
+#
+# Model is in the main HF cache (~/.cache/huggingface) - no separate local-dir needed.
+#
+# Usage:
+#   ./run-qwopus36-35b-a3b.sh
+#   PORT=8001 ./run-qwopus36-35b-a3b.sh
+#   GPU_MEMORY_UTILIZATION=0.85 ./run-qwopus36-35b-a3b.sh
+
+MODEL_ID="${MODEL_ID:-cyburn/Qwopus3.6-35B-A3B-v1-PrismaSCOUT-Blackwell-NVFP4-BF16-vllm-4.75bits}"
+CONTAINER_NAME="${CONTAINER_NAME:-qwopus36-35b-a3b}"
 IMAGE="${IMAGE:-vllm/vllm-openai:latest}"
 PORT="${PORT:-8000}"
 MAX_MODEL_LEN="${MAX_MODEL_LEN:-262144}"
 MAX_NUM_BATCHED_TOKENS="${MAX_NUM_BATCHED_TOKENS:-65536}"
 MAX_NUM_SEQS="${MAX_NUM_SEQS:-4}"
-GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.92}"
+GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.70}"
 BLOCK_SIZE="${BLOCK_SIZE:-64}"
 KV_CACHE_DTYPE="${KV_CACHE_DTYPE:-fp8}"
 DTYPE="${DTYPE:-bfloat16}"
@@ -40,7 +51,9 @@ ARGS=(
   --enable-auto-tool-choice
   --tool-call-parser qwen3_xml
   --reasoning-parser qwen3
+  --served-model-name cyburn/Qwopus3.6-35B-A3B
 )
+
 if [[ "$LOAD_FORMAT" != "auto" ]]; then
   ARGS+=(--load-format "$LOAD_FORMAT")
 fi
@@ -48,8 +61,14 @@ fi
 echo "Stopping old container if present: $CONTAINER_NAME"
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 
+echo ""
 echo "Starting $IMAGE on port $PORT"
-echo "vLLM args: ${ARGS[*]}"
+echo "  Model:    $MODEL_ID"
+echo "  GPU mem:  $GPU_MEMORY_UTILIZATION"
+echo "  Context:  $MAX_MODEL_LEN"
+echo "  Quant:    $QUANTIZATION / $DTYPE"
+echo "  Args:     ${ARGS[*]}"
+echo ""
 
 docker run -d \
   --name "$CONTAINER_NAME" \
@@ -62,9 +81,15 @@ docker run -d \
   -e HF_HOME=/root/.cache/huggingface \
   -e CUDA_MODULE_LOADING=LAZY \
   -v /home/mohammad/.cache/huggingface:/root/.cache/huggingface \
-  -v vllm-cache-qwen36:/root/.cache/vllm \
+  -v vllm-cache-qwopus36-35b:/root/.cache/vllm \
   "$IMAGE" \
   "${ARGS[@]}"
 
-echo "Container started. Follow logs with: docker logs -f $CONTAINER_NAME"
-echo "Health: curl -s http://localhost:$PORT/v1/models | jq"
+echo ""
+echo "Container started. Follow logs:   docker logs -f $CONTAINER_NAME"
+echo "Health:                           curl -s http://localhost:$PORT/v1/models | jq"
+echo ""
+echo "Chat:"
+echo "  curl http://localhost:$PORT/v1/chat/completions \\"
+echo "    -H \"Content-Type: application/json\" \\"
+echo "    -d '{\"model\": \"$MODEL_ID\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}], \"max_tokens\": 100}'"

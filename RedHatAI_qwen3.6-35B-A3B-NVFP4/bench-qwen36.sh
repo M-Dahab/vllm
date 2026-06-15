@@ -2,11 +2,11 @@
 set -Eeuo pipefail
 BASE_URL="${BASE_URL:-http://localhost:8000/v1}"
 MODEL="${MODEL:-RedHatAI/Qwen3.6-35B-A3B-NVFP4}"
-OUT_DIR="${OUT_DIR:-/home/mohammad/vllm/qwen3.6-35B-A3B-NVFP4/bench-results}"
+OUT_DIR="${OUT_DIR:-/home/mohammad/vllm/RedHatAI_qwen3.6-35B-A3B-NVFP4/bench-results}"
 PP="${PP:-512}"
 TG="${TG:-128}"
 RUNS="${RUNS:-1}"
-CONCURRENCY="${CONCURRENCY:-1 2}"
+CONCURRENCY="${CONCURRENCY:-1 2 4 6 8 10 12 16 26 32}"
 mkdir -p "$OUT_DIR"
 TS="$(date +%Y%m%d-%H%M%S)"
 OUT_JSON="$OUT_DIR/qwen36-${TS}.json"
