@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-MODEL_ID="${MODEL_ID:-RedHatAI/Qwen3.6-35B-A3B-NVFP4}"
+MODEL_ID="${MODEL_ID:-nvidia/Qwen3.6-35B-A3B-NVFP4}"
 CONTAINER_NAME="${CONTAINER_NAME:-qwen36-vllm}"
 IMAGE="${IMAGE:-vllm/vllm-openai:latest}"
 PORT="${PORT:-8000}"
@@ -12,7 +12,7 @@ GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.70}"
 BLOCK_SIZE="${BLOCK_SIZE:-64}"
 KV_CACHE_DTYPE="${KV_CACHE_DTYPE:-fp8}"
 DTYPE="${DTYPE:-bfloat16}"
-QUANTIZATION="${QUANTIZATION:-compressed-tensors}"
+QUANTIZATION="${QUANTIZATION:-modelopt}"
 ATTENTION_BACKEND="${ATTENTION_BACKEND:-flashinfer}"
 PERFORMANCE_MODE="${PERFORMANCE_MODE:-throughput}"
 LOAD_FORMAT="${LOAD_FORMAT:-auto}"
@@ -49,7 +49,7 @@ fi
 echo "Stopping old container if present: $CONTAINER_NAME"
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 
-echo "Starting $IMAGE on port $PORT"
+echo "Starting $IMAGE on port $PORT with model $MODEL_ID"
 echo "vLLM args: ${ARGS[*]}"
 
 docker run -d \
